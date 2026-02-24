@@ -27,11 +27,14 @@ interface Attribution {
     beta_market: number;
     beta_size: number;
     beta_value: number;
+    beta_profitability?: number;  // RMW — FF5
+    beta_momentum?: number;       // MOM — FF5
     r_squared: number;
     tracking_error_pct: number;
     information_ratio: number;
     win_rate_pct: number;
     n_observations: number;
+    factor_model?: string;        // "FF5" | "FF3"
     error?: string;
 }
 
@@ -62,7 +65,7 @@ function Tile({
     );
 }
 
-function SectionHeader({ color, label }: { color: string; label: string }) {
+function SectionHeader({ color, label }: { color: string; label: React.ReactNode }) {
     return (
         <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
             <span className={`w-1.5 h-1.5 rounded-full ${color}`} />
@@ -72,6 +75,50 @@ function SectionHeader({ color, label }: { color: string; label: string }) {
 }
 
 function sign(n: number) { return n >= 0 ? '+' : ''; }
+
+// Reusable factor attribution card
+function FactorCard({
+    label, value, threshold,
+    posLabel, negLabel, neutLabel,
+    posColor, negColor,
+    posRing, negRing,
+    proxy, posDesc, negDesc, neutDesc,
+}: {
+    label: React.ReactNode;
+    value: number;
+    threshold: number;
+    posLabel: string; negLabel: string; neutLabel: string;
+    posColor: string; negColor: string;
+    posRing: string;  negRing: string;
+    proxy: string;
+    posDesc: string; negDesc: string; neutDesc: string;
+}) {
+    const isPos  = value >  threshold;
+    const isNeg  = value < -threshold;
+    const valColor  = isPos ? posColor : isNeg ? negColor : 'text-slate-300';
+    const badgeRing = isPos ? posRing  : isNeg ? negRing  : 'bg-slate-800';
+    const badgeTxt  = isPos ? posColor : isNeg ? negColor : 'text-slate-500';
+    const badge     = isPos ? posLabel : isNeg ? negLabel : neutLabel;
+    const desc      = isPos ? posDesc  : isNeg ? negDesc  : neutDesc;
+    return (
+        <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
+            <div className="flex items-start justify-between mb-2">
+                <div>
+                    <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">{label}</p>
+                    <p className={`text-2xl font-black mt-0.5 ${valColor}`}>
+                        {sign(value)}{value.toFixed(3)}
+                    </p>
+                </div>
+                <span className={`text-[0.6rem] uppercase font-black px-2 py-1 rounded-md mt-1 ${badgeRing} ${badgeTxt}`}>
+                    {badge}
+                </span>
+            </div>
+            <p className="text-[0.65rem] text-slate-500 leading-relaxed">
+                Proxy: {proxy}. {desc}
+            </p>
+        </div>
+    );
+}
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
@@ -358,87 +405,85 @@ export default function StrategyAnalyticsPanel({
                     </div>
                 )}
 
-                {/* ── Section E: Factor Attribution (Fama-French proxies) ── */}
+                {/* ── Section E: Factor Attribution (FF5 proxies) ── */}
                 {attribution && !attribution.error && (
                     <div>
-                        <SectionHeader color="bg-blue-500" label="Factor Attribution (Fama-French Proxies)" />
+                        <SectionHeader
+                            color="bg-blue-500"
+                            label={`Factor Attribution (${attribution.factor_model ?? 'FF5'} Proxies)`}
+                        />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                            {/* Size Factor */}
-                            <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
-                                <div className="flex items-start justify-between mb-2">
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">
-                                            Size Factor β<sub>SMB</sub>
-                                        </p>
-                                        <p className={`text-2xl font-black mt-0.5 ${
-                                            attribution.beta_size > 0.1 ? 'text-violet-400'
-                                                : attribution.beta_size < -0.1 ? 'text-amber-400'
-                                                : 'text-slate-300'
-                                        }`}>
-                                            {sign(attribution.beta_size)}{attribution.beta_size.toFixed(3)}
-                                        </p>
-                                    </div>
-                                    <span className={`text-[0.6rem] uppercase font-black px-2 py-1 rounded-md mt-1 ${
-                                        attribution.beta_size > 0.1 ? 'bg-violet-500/20 text-violet-400'
-                                            : attribution.beta_size < -0.1 ? 'bg-amber-500/20 text-amber-400'
-                                            : 'bg-slate-800 text-slate-500'
-                                    }`}>
-                                        {attribution.beta_size > 0.1 ? 'Small-Cap Tilt'
-                                            : attribution.beta_size < -0.1 ? 'Large-Cap Tilt'
-                                            : 'Cap-Neutral'}
-                                    </span>
-                                </div>
-                                <p className="text-[0.65rem] text-slate-500 leading-relaxed">
-                                    Proxy: IWM − SPY (Russell 2000 vs S&P 500).
-                                    {attribution.beta_size > 0.1
-                                        ? ' Positive beta indicates this strategy tilts toward smaller companies.'
-                                        : attribution.beta_size < -0.1
-                                        ? ' Negative beta indicates a large-cap bias relative to the market.'
-                                        : ' Near-zero beta suggests cap-neutral exposure.'}
-                                </p>
-                            </div>
 
-                            {/* Value Factor */}
-                            <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-4">
-                                <div className="flex items-start justify-between mb-2">
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">
-                                            Value Factor β<sub>HML</sub>
-                                        </p>
-                                        <p className={`text-2xl font-black mt-0.5 ${
-                                            attribution.beta_value > 0.1 ? 'text-amber-400'
-                                                : attribution.beta_value < -0.1 ? 'text-blue-400'
-                                                : 'text-slate-300'
-                                        }`}>
-                                            {sign(attribution.beta_value)}{attribution.beta_value.toFixed(3)}
-                                        </p>
-                                    </div>
-                                    <span className={`text-[0.6rem] uppercase font-black px-2 py-1 rounded-md mt-1 ${
-                                        attribution.beta_value > 0.1 ? 'bg-amber-500/20 text-amber-400'
-                                            : attribution.beta_value < -0.1 ? 'bg-blue-500/20 text-blue-400'
-                                            : 'bg-slate-800 text-slate-500'
-                                    }`}>
-                                        {attribution.beta_value > 0.1 ? 'Value Tilt'
-                                            : attribution.beta_value < -0.1 ? 'Growth Tilt'
-                                            : 'Style-Neutral'}
-                                    </span>
-                                </div>
-                                <p className="text-[0.65rem] text-slate-500 leading-relaxed">
-                                    Proxy: IVE − IVW (S&P 500 Value vs S&P 500 Growth).
-                                    {attribution.beta_value > 0.1
-                                        ? ' Positive beta indicates value/cheap-stock exposure.'
-                                        : attribution.beta_value < -0.1
-                                        ? ' Negative beta indicates growth/momentum stock exposure.'
-                                        : ' Near-zero beta suggests style-neutral positioning.'}
-                                </p>
-                            </div>
+                            {/* Size Factor β_SMB */}
+                            <FactorCard
+                                label={<>Size Factor β<sub>SMB</sub></>}
+                                value={attribution.beta_size}
+                                threshold={0.1}
+                                posLabel="Small-Cap Tilt" negLabel="Large-Cap Tilt" neutLabel="Cap-Neutral"
+                                posColor="text-violet-400" posRing="bg-violet-500/20"
+                                negColor="text-amber-400"  negRing="bg-amber-500/20"
+                                proxy="IWM − SPY (Russell 2000 vs S&P 500)"
+                                posDesc="Positive beta indicates a tilt toward smaller companies."
+                                negDesc="Negative beta indicates a large-cap bias vs the market."
+                                neutDesc="Near-zero beta suggests cap-neutral exposure."
+                            />
+
+                            {/* Value Factor β_HML */}
+                            <FactorCard
+                                label={<>Value Factor β<sub>HML</sub></>}
+                                value={attribution.beta_value}
+                                threshold={0.1}
+                                posLabel="Value Tilt" negLabel="Growth Tilt" neutLabel="Style-Neutral"
+                                posColor="text-amber-400" posRing="bg-amber-500/20"
+                                negColor="text-blue-400"  negRing="bg-blue-500/20"
+                                proxy="IVE − IVW (S&P 500 Value vs S&P 500 Growth)"
+                                posDesc="Positive beta indicates value / cheap-stock exposure."
+                                negDesc="Negative beta indicates growth / momentum stock exposure."
+                                neutDesc="Near-zero beta suggests style-neutral positioning."
+                            />
+
+                            {/* Profitability Factor β_RMW — only if FF5 data available */}
+                            {attribution.beta_profitability !== undefined && (
+                                <FactorCard
+                                    label={<>Profitability Factor β<sub>RMW</sub></>}
+                                    value={attribution.beta_profitability}
+                                    threshold={0.05}
+                                    posLabel="Quality Tilt" negLabel="Speculative Tilt" neutLabel="Profitability-Neutral"
+                                    posColor="text-emerald-400" posRing="bg-emerald-500/20"
+                                    negColor="text-rose-400"    negRing="bg-rose-500/20"
+                                    proxy="QUAL − SPY (iShares MSCI USA Quality vs S&P 500)"
+                                    posDesc="Positive beta indicates a tilt toward highly profitable, high-ROE companies."
+                                    negDesc="Negative beta indicates exposure to lower-profitability or speculative names."
+                                    neutDesc="Near-zero beta suggests profitability-neutral exposure."
+                                />
+                            )}
+
+                            {/* Momentum Factor β_MOM — only if FF5 data available */}
+                            {attribution.beta_momentum !== undefined && (
+                                <FactorCard
+                                    label={<>Momentum Factor β<sub>MOM</sub></>}
+                                    value={attribution.beta_momentum}
+                                    threshold={0.05}
+                                    posLabel="Momentum Tilt" negLabel="Contrarian Tilt" neutLabel="Momentum-Neutral"
+                                    posColor="text-cyan-400"  posRing="bg-cyan-500/20"
+                                    negColor="text-orange-400" negRing="bg-orange-500/20"
+                                    proxy="MTUM − SPY (iShares MSCI USA Momentum vs S&P 500)"
+                                    posDesc="Positive beta indicates a tilt toward recent price winners."
+                                    negDesc="Negative beta indicates a contrarian / mean-reversion bias."
+                                    neutDesc="Near-zero beta suggests momentum-neutral positioning."
+                                />
+                            )}
                         </div>
 
                         {/* OLS model quality note */}
                         <p className="text-[0.62rem] text-slate-600 mt-3 leading-relaxed">
-                            OLS regression: r = α + β<sub>mkt</sub>·SPY + β<sub>size</sub>·(IWM−SPY) + β<sub>value</sub>·(IVE−IVW) + ε &nbsp;|&nbsp;
+                            OLS: r = α + β<sub>mkt</sub>·SPY + β<sub>SMB</sub>·(IWM−SPY) + β<sub>HML</sub>·(IVE−IVW)
+                            {attribution.factor_model === 'FF5' && (
+                                <> + β<sub>RMW</sub>·(QUAL−SPY) + β<sub>MOM</sub>·(MTUM−SPY)</>
+                            )}
+                            {' '}+ ε &nbsp;|&nbsp;
                             R² = {(attribution.r_squared * 100).toFixed(1)}% &nbsp;|&nbsp;
-                            n = {attribution.n_observations.toLocaleString()} daily observations
+                            n = {attribution.n_observations.toLocaleString()} daily obs
                         </p>
                     </div>
                 )}

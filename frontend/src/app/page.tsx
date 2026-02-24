@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import LiveStatsBanner from '../components/LiveStatsBanner';
 import StrategyCard from '../components/StrategyCard';
 import PerformanceTable from '../components/PerformanceTable';
 import ProjectionCalc from '../components/ProjectionCalc';
@@ -63,8 +62,6 @@ export default function Home() {
 
     return (
         <div className="min-h-screen bg-slate-950 flex flex-col font-sans pb-20 overflow-x-hidden selection:bg-emerald-500/30">
-            <LiveStatsBanner strategyId={selectedStrategy} />
-
             {/* Ambient glow */}
             <div
                 className="fixed top-0 left-1/2 -ml-[40rem] w-[80rem] h-[50rem] opacity-20 pointer-events-none"

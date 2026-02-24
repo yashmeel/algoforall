@@ -60,7 +60,7 @@ export default function ChartInteractive({
         fetchCurve();
     }, [strategyId]);
 
-    // Slice data to selected period client-side
+    // Slice data to selected period and rebase to 0% at period start
     const data = useMemo(() => {
         if (!allData.length) return [];
         if (period === 'max') return allData;
@@ -68,7 +68,16 @@ export default function ChartInteractive({
         const cutoff = new Date();
         cutoff.setFullYear(cutoff.getFullYear() - yearsBack);
         const cutoffStr = cutoff.toISOString().slice(0, 10);
-        return allData.filter(d => d.date >= cutoffStr);
+        const sliced = allData.filter(d => d.date >= cutoffStr);
+        if (!sliced.length) return [];
+        // Rebase: divide by first-point value so both series start at 0%
+        const b0  = 1 + sliced[0].STGT;
+        const bl0 = 1 + sliced[0].Baseline;
+        return sliced.map(d => ({
+            ...d,
+            STGT:     (1 + d.STGT)     / b0  - 1,
+            Baseline: (1 + d.Baseline) / bl0 - 1,
+        }));
     }, [allData, period]);
 
     const getNames = (): [string, string] => {

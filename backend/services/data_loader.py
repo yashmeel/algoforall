@@ -175,26 +175,37 @@ def _get_factor_cache_path():
 
 def _load_or_download_factors() -> pd.DataFrame:
     """
-    Load or download SPY/IWM/IVE/IVW daily log-returns.
+    Load or download factor ETF daily log-returns for FF5 attribution.
+    Tickers:
+      SPY  — market
+      IWM  — size (SMB proxy: Russell 2000)
+      IVE  — value leg (HML proxy: S&P 500 Value)
+      IVW  — growth leg (HML proxy: S&P 500 Growth)
+      QUAL — profitability (RMW proxy: iShares MSCI USA Quality Factor)
+      MTUM — momentum (MOM proxy: iShares MSCI USA Momentum Factor)
     Cached to data_store/factor_returns.csv on first call.
     """
     cache_path = _get_factor_cache_path()
     if os.path.exists(cache_path):
         df = pd.read_csv(cache_path, index_col=0, parse_dates=True)
-        return df
+        # Regenerate cache if it's missing the new FF5 columns
+        if "QUAL" not in df.columns or "MTUM" not in df.columns:
+            os.remove(cache_path)
+        else:
+            return df
 
     # Download from yfinance
     try:
         import yfinance as yf
-        tickers = ["SPY", "IWM", "IVE", "IVW"]
-        raw = yf.download(tickers, start="1999-01-01", end="2026-02-01",
+        tickers = ["SPY", "IWM", "IVE", "IVW", "QUAL", "MTUM"]
+        raw = yf.download(tickers, start="1999-01-01", end="2026-12-31",
                           auto_adjust=True, progress=False)
         if isinstance(raw.columns, pd.MultiIndex):
             prices = raw["Close"]
         else:
             prices = raw
-        prices = prices.ffill().dropna()
-        log_returns = np.log(prices / prices.shift(1)).dropna()
+        prices = prices.ffill().dropna(how="all")
+        log_returns = np.log(prices / prices.shift(1)).dropna(how="all")
         log_returns.to_csv(cache_path)
         return log_returns
     except Exception as e:
@@ -203,14 +214,21 @@ def _load_or_download_factors() -> pd.DataFrame:
 
 def compute_factor_attribution(strategy_id: str) -> dict:
     """
-    OLS factor attribution for a strategy vs Fama-French-style proxies.
+    OLS Fama-French 5-Factor attribution for a strategy.
 
-    Model:
-      r_t = alpha_d + beta_mkt * r_SPY + beta_size * (r_IWM - r_SPY)
-                    + beta_value * (r_IVE - r_IVW) + eps_t
+    Model (FF5 with momentum):
+      r_t = alpha_d
+            + beta_mkt  * r_SPY
+            + beta_size * (r_IWM  - r_SPY)   # SMB: small-minus-big
+            + beta_value* (r_IVE  - r_IVW)   # HML: high-minus-low
+            + beta_prof * (r_QUAL - r_SPY)   # RMW: robust-minus-weak profitability
+            + beta_mom  * (r_MTUM - r_SPY)   # MOM: momentum
+            + eps_t
 
-    Returns annualized alpha, market beta, size beta, value beta,
-    tracking error vs SPY, information ratio, and R-squared.
+    Returns annualized alpha, all five betas, R-squared,
+    tracking error vs SPY, information ratio, and win rate.
+    QUAL/MTUM data starts ~2013, so shorter strategies may have
+    fewer observations for the FF5 factors.
     """
     files = STRATEGY_FILES.get(strategy_id)
     if not files:
@@ -222,36 +240,57 @@ def compute_factor_attribution(strategy_id: str) -> dict:
 
     strategy_returns = df_strat["Return"].dropna()
 
-    # Load factor returns
+    # Load factor returns (FF5: SPY, IWM, IVE, IVW, QUAL, MTUM)
     factors = _load_or_download_factors()
     if factors.empty:
         return {"error": "Factor data unavailable"}
 
-    # Align
+    # Align strategy with factors
     aligned = strategy_returns.to_frame("strategy").join(factors, how="inner")
     if len(aligned) < 60:
         return {}
 
     y = aligned["strategy"].values
-    spy = aligned.get("SPY", pd.Series(0.0, index=aligned.index)).values
-    iwm = aligned.get("IWM", pd.Series(0.0, index=aligned.index)).values
-    ive = aligned.get("IVE", pd.Series(0.0, index=aligned.index)).values
-    ivw = aligned.get("IVW", pd.Series(0.0, index=aligned.index)).values
 
-    smb = iwm - spy   # Small-minus-Big (size factor)
-    hml = ive - ivw   # High-minus-Low (value factor)
+    def _col(name):
+        return aligned[name].values if name in aligned.columns else np.zeros(len(aligned))
 
-    # Design matrix: [intercept, SPY, SMB, HML]
-    X = np.column_stack([np.ones(len(y)), spy, smb, hml])
+    spy  = _col("SPY")
+    iwm  = _col("IWM")
+    ive  = _col("IVE")
+    ivw  = _col("IVW")
+    qual = _col("QUAL")
+    mtum = _col("MTUM")
+
+    smb = iwm  - spy   # Small-minus-Big  (size)
+    hml = ive  - ivw   # High-minus-Low   (value)
+    rmw = qual - spy   # Robust-minus-Weak profitability (QUAL proxy)
+    mom = mtum - spy   # Momentum         (MTUM proxy)
+
+    # Determine which factors are non-zero (QUAL/MTUM may not exist pre-2013)
+    has_rmw = np.any(rmw != 0)
+    has_mom = np.any(mom != 0)
+
+    if has_rmw and has_mom:
+        # Full FF5 model
+        X = np.column_stack([np.ones(len(y)), spy, smb, hml, rmw, mom])
+        factor_model = "FF5"
+    else:
+        # Fallback to 3-factor if quality/momentum data not available
+        X = np.column_stack([np.ones(len(y)), spy, smb, hml])
+        factor_model = "FF3"
+
     try:
-        betas, residuals, _, _ = np.linalg.lstsq(X, y, rcond=None)
+        betas, _, _, _ = np.linalg.lstsq(X, y, rcond=None)
     except np.linalg.LinAlgError:
         return {}
 
     alpha_daily = float(betas[0])
-    beta_mkt = float(betas[1])
-    beta_size = float(betas[2])
-    beta_value = float(betas[3])
+    beta_mkt    = float(betas[1])
+    beta_size   = float(betas[2])
+    beta_value  = float(betas[3])
+    beta_prof   = float(betas[4]) if len(betas) > 4 else 0.0
+    beta_mom_v  = float(betas[5]) if len(betas) > 5 else 0.0
 
     # R-squared
     y_pred = X @ betas
@@ -260,7 +299,7 @@ def compute_factor_attribution(strategy_id: str) -> dict:
     r_squared = float(1.0 - ss_res / max(ss_tot, 1e-12))
 
     # Tracking error & information ratio vs SPY
-    active = y - spy[: len(y)]
+    active = y - spy
     tracking_error = float(np.std(active) * np.sqrt(252) * 100)
     ann_active = float(np.mean(active) * 252 * 100)
     info_ratio = ann_active / tracking_error if tracking_error > 0 else 0.0
@@ -269,13 +308,16 @@ def compute_factor_attribution(strategy_id: str) -> dict:
     win_rate = float((y > 0).mean() * 100)
 
     return {
-        "alpha_ann_pct": round(alpha_daily * 252 * 100, 2),
-        "beta_market": round(beta_mkt, 3),
-        "beta_size": round(beta_size, 3),
-        "beta_value": round(beta_value, 3),
-        "r_squared": round(max(0.0, r_squared), 4),
+        "alpha_ann_pct":      round(alpha_daily * 252 * 100, 2),
+        "beta_market":        round(beta_mkt, 3),
+        "beta_size":          round(beta_size, 3),
+        "beta_value":         round(beta_value, 3),
+        "beta_profitability": round(beta_prof, 3),
+        "beta_momentum":      round(beta_mom_v, 3),
+        "r_squared":          round(max(0.0, r_squared), 4),
         "tracking_error_pct": round(tracking_error, 2),
-        "information_ratio": round(info_ratio, 3),
-        "win_rate_pct": round(win_rate, 1),
-        "n_observations": int(len(y)),
+        "information_ratio":  round(info_ratio, 3),
+        "win_rate_pct":       round(win_rate, 1),
+        "n_observations":     int(len(y)),
+        "factor_model":       factor_model,
     }
