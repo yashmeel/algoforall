@@ -55,7 +55,7 @@ export default function Home() {
         if (selectedStrategy.includes("mag7")) return rpMetrics;
         if (selectedStrategy === "quality_factor") return qualMetrics;
         return baseMetrics;
-    }
+    };
 
     return (
         <div className="min-h-screen bg-slate-950 flex flex-col font-sans pb-24 overflow-x-hidden selection:bg-emerald-500/30">
@@ -70,11 +70,10 @@ export default function Home() {
                 animate="visible"
                 className="relative z-10 w-full"
             >
-                {/* 1. The Hook: Hero & Strategy Cards */}
-                <motion.section variants={itemVariants} className="pt-24 pb-16 px-6 max-w-7xl mx-auto w-full">
+                {/* Hero & Dashboard */}
+                <motion.section variants={itemVariants} className="pt-24 pb-16 px-6 max-w-[1600px] mx-auto w-full">
                     <div className="text-center mb-16 relative">
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-500/20 blur-[120px] rounded-full pointer-events-none" />
-
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -91,8 +90,7 @@ export default function Home() {
                     </div>
 
                     {/* Unified Dashboard Grid */}
-                    <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 max-w-[1600px] mx-auto">
-
+                    <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
                         {/* LEFT SIDEBAR: Strategy Selection */}
                         <div className="xl:col-span-1 flex flex-col gap-4">
                             <h2 className="text-xl font-display font-bold text-slate-200 mb-2 px-2">Alpha Engines</h2>
@@ -150,104 +148,100 @@ export default function Home() {
                             />
                         </div>
 
+                        {/* RIGHT MAIN PANE: Workspace */}
+                        <div className="xl:col-span-3 flex flex-col">
+                            {/* Tab Navigation */}
+                            <div className="flex space-x-2 mb-6 bg-slate-900/40 p-1 rounded-xl backdrop-blur-md border border-slate-700/50 w-fit">
+                                <button
+                                    onClick={() => setActiveTab('historical')}
+                                    className={`px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${activeTab === 'historical'
+                                        ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                                        }`}
+                                >
+                                    Historical Backtest
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('projection')}
+                                    className={`px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${activeTab === 'projection'
+                                        ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                                        }`}
+                                >
+                                    Monte Carlo Projection
+                                </button>
+                            </div>
+
+                            {/* Tab Content Area */}
+                            <div className="flex-1 bg-slate-900/20 border border-slate-800/80 backdrop-blur-sm rounded-3xl p-6 relative overflow-hidden min-h-[700px]">
+                                <AnimatePresence mode='wait'>
+                                    {activeTab === 'historical' ? (
+                                        <motion.div
+                                            key="tab-historical"
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="h-full flex flex-col xl:flex-row gap-6"
+                                        >
+                                            <div className="flex-1 min-h-[500px]">
+                                                <ChartInteractive strategyId={selectedStrategy} />
+                                            </div>
+                                            <div className="w-full xl:w-96 shrink-0">
+                                                <PerformanceTable strategyId={selectedStrategy} />
+                                            </div>
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div
+                                            key="tab-projection"
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="h-full pt-4"
+                                        >
+                                            <ProjectionCalc
+                                                stgtMetrics={{ cagr: currentMetrics.cagr, volatility: currentMetrics.volatility }}
+                                                baseMetrics={{ cagr: getBaseMetrics().cagr, volatility: getBaseMetrics().volatility }}
+                                            />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
                     </div>
                 </motion.section>
 
-                {/* RIGHT MAIN PANE: Workspace */}
-                <div className="xl:col-span-3 flex flex-col">
-                    {/* Tab Navigation */}
-                    <div className="flex space-x-2 mb-6 bg-slate-900/40 p-1 rounded-xl backdrop-blur-md border border-slate-700/50 w-fit">
-                        <button
-                            onClick={() => setActiveTab('historical')}
-                            className={`px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${activeTab === 'historical'
-                                ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                                }`}
-                        >
-                            Historical Backtest
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('projection')}
-                            className={`px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 ${activeTab === 'projection'
-                                ? 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                                }`}
-                        >
-                            Monte Carlo Projection
-                        </button>
-                    </div>
-
-                    {/* Tab Content Area */}
-                    <div className="flex-1 bg-slate-900/20 border border-slate-800/80 backdrop-blur-sm rounded-3xl p-6 relative overflow-hidden min-h-[700px]">
-                        <AnimatePresence mode='wait'>
-                            {activeTab === 'historical' ? (
-                                <motion.div
-                                    key="tab-historical"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="h-full flex flex-col xl:flex-row gap-6"
+                {/* Gating & Advanced Quant */}
+                <motion.section variants={itemVariants} className="max-w-3xl mx-auto w-full px-6 mt-4 text-center">
+                    <motion.div
+                        whileHover={{ scale: 1.01 }}
+                        className="bg-gradient-to-br from-slate-900 to-slate-950 p-10 md:p-14 rounded-[2rem] border border-slate-800 shadow-2xl relative overflow-hidden group"
+                    >
+                        <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-emerald-500/10 rounded-full blur-3xl -mr-[20rem] -mt-[20rem] transition-transform duration-1000 group-hover:scale-110"></div>
+                        <div className="relative z-10">
+                            <h3 className="text-3xl font-black text-white mb-4 tracking-tight">Unlock the Terminal</h3>
+                            <p className="text-slate-400 mb-8 max-w-lg mx-auto text-lg">
+                                Gain institutional API access to the Fama-French 6-Factor attribution, Probabilistic Sharpe (PSR), and dynamic weight ledgers.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <input
+                                    type="email"
+                                    placeholder="Institutional Email Required"
+                                    className="bg-slate-950/80 border border-slate-700/80 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-emerald-500 w-full sm:w-96 text-lg placeholder-slate-600 transition-colors backdrop-blur-sm"
+                                />
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-8 rounded-xl transition-colors whitespace-nowrap shadow-xl shadow-emerald-900/40 text-lg"
                                 >
-                                    <div className="flex-1 min-h-[500px]">
-                                        <ChartInteractive strategyId={selectedStrategy} />
-                                    </div>
-                                    <div className="w-full xl:w-96 shrink-0">
-                                        <PerformanceTable strategyId={selectedStrategy} />
-                                    </div>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="tab-projection"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="h-full pt-4"
-                                >
-                                    <ProjectionCalc
-                                        stgtMetrics={{ cagr: currentMetrics.cagr, volatility: currentMetrics.volatility }}
-                                        baseMetrics={{ cagr: getBaseMetrics().cagr, volatility: getBaseMetrics().volatility }}
-                                    />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
-
-        </div>
-        </motion.section >
-
-        {/* 4. Gating & Advanced Quant */ }
-        < motion.section variants = { itemVariants } className = "max-w-3xl mx-auto w-full px-6 mt-4 text-center" >
-            <motion.div
-                whileHover={{ scale: 1.01 }}
-                className="bg-gradient-to-br from-slate-900 to-slate-950 p-10 md:p-14 rounded-[2rem] border border-slate-800 shadow-2xl relative overflow-hidden group"
-            >
-                <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-emerald-500/10 rounded-full blur-3xl -mr-[20rem] -mt-[20rem] transition-transform duration-1000 group-hover:scale-110"></div>
-                <div className="relative z-10">
-                    <h3 className="text-3xl font-black text-white mb-4 tracking-tight">Unlock the Terminal</h3>
-                    <p className="text-slate-400 mb-8 max-w-lg mx-auto text-lg">
-                        Gain institutional API access to the Fama-French 6-Factor attribution, Probabilistic Sharpe (PSR), and dynamic weight ledgers.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <input
-                            type="email"
-                            placeholder="Institutional Email Required"
-                            className="bg-slate-950/80 border border-slate-700/80 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-emerald-500 w-full sm:w-96 text-lg placeholder-slate-600 transition-colors backdrop-blur-sm"
-                        />
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-8 rounded-xl transition-colors whitespace-nowrap shadow-xl shadow-emerald-900/40 text-lg"
-                        >
-                            Request Access
-                        </motion.button>
-                    </div>
-                </div>
+                                    Request Access
+                                </motion.button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </motion.section>
             </motion.div>
-        </motion.section >
-    </motion.div >
-</div >
-);
+        </div>
+    );
 }
