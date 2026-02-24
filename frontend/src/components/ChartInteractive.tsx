@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Brush, Legend } from 'recharts';
 
 interface TimeSeriesPoint {
@@ -22,7 +22,6 @@ interface AdvancedMetrics {
 }
 
 export default function ChartInteractive({ strategyId = 'dynamic_alpha' }) {
-    const [viewMode, setViewMode] = useState<'absolute' | 'relative'>('absolute');
     const [data, setData] = useState<TimeSeriesPoint[]>([]);
     const [metrics, setMetrics] = useState<AdvancedMetrics | null>(null);
     const [loading, setLoading] = useState(true);
@@ -65,172 +64,97 @@ export default function ChartInteractive({ strategyId = 'dynamic_alpha' }) {
     };
     const [targetName, baseName] = getNames();
 
-    return (
-        <div className="bg-slate-900/40 border border-slate-700/50 backdrop-blur-2xl rounded-2xl p-6 shadow-2xl w-full h-full flex flex-col relative overflow-hidden group">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-            <div className="mb-6 relative z-10">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xl font-display font-bold text-white tracking-tight">
-                        {viewMode === 'absolute' ? 'Cumulative Performance' : 'Cumulative Relative Performance'}
-                    </h3>
-                    <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800">
-                        <button
-                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === 'absolute' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
-                            onClick={() => setViewMode('absolute')}
-                        >
-                            Absolute
-                        </button>
-                        <button
-                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${viewMode === 'relative' ? 'bg-violet-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
-                            onClick={() => setViewMode('relative')}
-                        >
-                            Relative
-                        </button>
-                    </div>
-                </div>
+    // Smart Y-axis: convert decimal to readable % with auto range
+    const formatYAxis = (val: number) => {
+        const pct = val * 100;
+        if (Math.abs(pct) >= 1000) return `${(pct / 1000).toFixed(1)}k%`;
+        return `${pct.toFixed(0)}%`;
+    };
 
-                {/* Advanced Institutional Metrics Layout */}
+    return (
+        <div className="bg-slate-900/40 border border-slate-700/50 backdrop-blur-2xl rounded-2xl p-4 md:p-6 shadow-2xl w-full h-full flex flex-col relative overflow-hidden group">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+
+            {/* Header */}
+            <div className="mb-4 relative z-10">
+                <h3 className="text-lg md:text-xl font-display font-bold text-white tracking-tight mb-3">
+                    Cumulative Performance
+                </h3>
+
+                {/* Metrics strip — single row, 7 items, no overflow */}
                 {metrics && (
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-3 bg-slate-950/50 p-3 md:p-4 rounded-xl border border-slate-800/80"
+                        className="grid grid-cols-4 sm:grid-cols-7 gap-px bg-slate-800/60 rounded-xl overflow-hidden border border-slate-800/60"
                     >
-                        {/* Mobile: compact 3x3 grid, Desktop: 3 column with dividers */}
-                        <div className="grid grid-cols-3 md:grid-cols-3 gap-x-2 gap-y-3 md:gap-6 md:divide-x divide-slate-800/60">
-                            {/* Risk-Adjusted */}
-                            <div className="col-span-3 md:col-span-1 md:pl-0">
-                                <h4 className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Risk-Adjusted
-                                </h4>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Sharpe</p>
-                                        <p className="text-base md:text-lg font-black text-slate-100">{metrics.sharpe.toFixed(2)}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Sortino</p>
-                                        <p className={`text-base md:text-lg font-black ${metrics.sortino >= 1.0 ? 'text-emerald-400' : 'text-slate-100'}`}>{metrics.sortino.toFixed(2)}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Calmar</p>
-                                        <p className={`text-base md:text-lg font-black ${metrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-100'}`}>{metrics.calmar.toFixed(2)}</p>
-                                    </div>
-                                </div>
+                        {[
+                            { label: 'Sharpe', value: metrics.sharpe.toFixed(2), color: metrics.sharpe >= 1 ? 'text-emerald-400' : 'text-slate-100' },
+                            { label: 'Sortino', value: metrics.sortino.toFixed(2), color: metrics.sortino >= 1 ? 'text-emerald-400' : 'text-slate-100' },
+                            { label: 'Calmar', value: metrics.calmar.toFixed(2), color: metrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-100' },
+                            { label: 'Info Ratio', value: metrics.information_ratio.toFixed(2), color: metrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400' },
+                            { label: 'Alpha', value: `${metrics.alpha_pct > 0 ? '+' : ''}${metrics.alpha_pct.toFixed(1)}%`, color: metrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400' },
+                            { label: 'Beta', value: metrics.beta.toFixed(2), color: 'text-slate-200' },
+                            { label: 'DD Days', value: `${metrics.max_dd_duration}d`, color: 'text-rose-300' },
+                        ].map((m, i) => (
+                            <div key={i} className="bg-slate-950/60 px-2 py-2 flex flex-col items-center justify-center text-center">
+                                <p className="text-[0.55rem] uppercase text-slate-500 font-bold tracking-wider leading-none mb-1">{m.label}</p>
+                                <p className={`text-xs sm:text-sm font-black leading-none ${m.color}`}>{m.value}</p>
                             </div>
-                            {/* Border separator on mobile */}
-                            <div className="col-span-3 border-t border-slate-800/60 md:hidden"></div>
-                            {/* Relative Profile */}
-                            <div className="col-span-3 md:col-span-1 md:pl-6">
-                                <h4 className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span> Relative
-                                </h4>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Info Ratio</p>
-                                        <p className={`text-base md:text-lg font-black ${metrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400'}`}>
-                                            {metrics.information_ratio.toFixed(2)}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Alpha</p>
-                                        <p className={`text-base md:text-lg font-black ${metrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400'}`}>
-                                            {metrics.alpha_pct > 0 ? '+' : ''}{metrics.alpha_pct.toFixed(2)}%
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Beta</p>
-                                        <p className="text-base md:text-lg font-black text-slate-300">{metrics.beta.toFixed(2)}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Border separator on mobile */}
-                            <div className="col-span-3 border-t border-slate-800/60 md:hidden"></div>
-                            {/* Stress */}
-                            <div className="col-span-3 md:col-span-1 md:pl-6">
-                                <h4 className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span> Stress
-                                </h4>
-                                <div>
-                                    <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Max DD Duration</p>
-                                    <p className="text-base md:text-lg font-black text-slate-300">
-                                        {metrics.max_dd_duration} <span className="text-xs text-slate-500 font-medium">Days</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        ))}
                     </motion.div>
                 )}
             </div>
 
-            <div className="flex-1 min-h-[260px] md:min-h-[380px] w-full mt-2">
+            {/* Chart */}
+            <div className="flex-1 min-h-[260px] md:min-h-[380px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                    <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                         <XAxis
                             dataKey="date"
                             stroke="#64748b"
-                            tick={{ fontSize: 12 }}
+                            tick={{ fontSize: 11 }}
                             minTickGap={60}
                             tickFormatter={(val) => val.split("-")[0]}
                         />
                         <YAxis
                             stroke="#64748b"
-                            tickFormatter={(val) => `${(val * 100).toFixed(0)}%`}
+                            tick={{ fontSize: 11 }}
+                            tickFormatter={formatYAxis}
                             domain={['auto', 'auto']}
-                            width={60}
+                            width={52}
                         />
                         <Tooltip
-                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
+                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)' }}
                             itemStyle={{ fontWeight: 'bold' }}
                             formatter={(value: number, name: string) => [`${(value * 100).toFixed(2)}%`, name]}
-                            labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontWeight: 'bold' }}
+                            labelStyle={{ color: '#94a3b8', marginBottom: '6px', fontWeight: 'bold' }}
                         />
-                        <Legend verticalAlign="top" height={40} iconType="circle" wrapperStyle={{ fontSize: '12px', fontWeight: '600', color: '#cbd5e1' }} />
+                        <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '11px', fontWeight: '600', color: '#cbd5e1' }} />
 
-                        {/* The AI Strategy Line */}
-                        {viewMode === 'absolute' && (
-                            <Line
-                                type="monotone"
-                                dataKey="STGT"
-                                name={targetName}
-                                stroke="#10b981"
-                                strokeWidth={3}
-                                dot={false}
-                                activeDot={{ r: 6, fill: '#10b981', strokeWidth: 0 }}
-                            />
-                        )}
+                        <Line
+                            type="monotone"
+                            dataKey="STGT"
+                            name={targetName}
+                            stroke="#10b981"
+                            strokeWidth={2.5}
+                            dot={false}
+                            activeDot={{ r: 5, fill: '#10b981', strokeWidth: 0 }}
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="Baseline"
+                            name={baseName}
+                            stroke="#64748b"
+                            strokeWidth={1.5}
+                            strokeDasharray="5 5"
+                            dot={false}
+                        />
 
-                        {/* The Baseline Line */}
-                        {viewMode === 'absolute' && (
-                            <Line
-                                type="monotone"
-                                dataKey="Baseline"
-                                name={baseName}
-                                stroke="#64748b"
-                                strokeWidth={2}
-                                strokeDasharray="5 5"
-                                dot={false}
-                            />
-                        )}
-
-                        {/* Relative Performance Line */}
-                        {viewMode === 'relative' && (
-                            <Line
-                                type="monotone"
-                                dataKey="Relative"
-                                name="Relative Outperformance vs Baseline"
-                                stroke="#8b5cf6"
-                                strokeWidth={3}
-                                dot={false}
-                                activeDot={{ r: 6, fill: '#8b5cf6', strokeWidth: 0 }}
-                            />
-                        )}
-
-                        {/* The Interactive Zoom Slider */}
                         <Brush
                             dataKey="date"
-                            height={30}
+                            height={24}
                             stroke="#334155"
                             fill="#0f172a"
                             tickFormatter={() => ''}

@@ -153,12 +153,12 @@ def load_combined_equity_curve(strategy_id: str):
     dd_duration = is_dd.groupby((~is_dd).cumsum()).sum()
     max_dd_duration = int(dd_duration.max())
     
-    # 3. Alpha (Simplified CAPM relative to Benchmark)
-    # In a true system, this would use statmodels OLS against Fama-French.
-    # Here, we calculate Beta to the benchmark, then solve for Alpha.
+    # 3. Beta (market sensitivity) and Alpha (annualized active return over benchmark)
     cov_matrix = np.cov(target_returns, base_returns)
     beta = cov_matrix[0, 1] / cov_matrix[1, 1] if cov_matrix[1, 1] > 0 else 1
-    alpha = ann_ret - (beta * (base_returns.mean() * 252))
+    # Alpha = annualized strategy return minus annualized benchmark return (active return)
+    base_ann_ret = base_returns.mean() * 252
+    alpha = ann_ret - base_ann_ret
     
     metrics = {
         "sharpe": float(round(sharpe, 2)),
