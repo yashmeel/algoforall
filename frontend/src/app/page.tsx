@@ -7,6 +7,7 @@ import StrategyCard from '../components/StrategyCard';
 import PerformanceTable from '../components/PerformanceTable';
 import ProjectionCalc from '../components/ProjectionCalc';
 import ChartInteractive from '../components/ChartInteractive';
+import StrategyDetailPanel from '../components/StrategyDetailPanel';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -242,8 +243,51 @@ export default function Home() {
                     </div>
                 </motion.section>
 
+                {/* Full Strategy Analytics Section */}
+                <motion.section variants={itemVariants} className="px-4 md:px-6 max-w-[1600px] mx-auto w-full mt-6 md:mt-8">
+                    <div className="bg-slate-900/30 border border-slate-800/60 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-8">
+                        {/* Strategy Tabs */}
+                        <div className="flex gap-1.5 md:gap-2 mb-6 overflow-x-auto pb-1 scrollbar-none">
+                            {[
+                                { id: "dynamic_alpha", label: "Dynamic Alpha" },
+                                { id: "horizon_parity", label: "Sector Baseline" },
+                                { id: "mag7_multiscale", label: "Mag7 Multi" },
+                                { id: "mag7_riskparity", label: "Mag7 RP" },
+                                { id: "quality_factor", label: "Quality 100" },
+                            ].map(({ id, label }) => (
+                                <button
+                                    key={id}
+                                    onClick={() => setSelectedStrategy(id)}
+                                    className={`shrink-0 px-3 md:px-5 py-2 rounded-lg text-xs md:text-sm font-semibold transition-all duration-200 ${
+                                        selectedStrategy === id
+                                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent'
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                        <StrategyDetailPanel
+                            strategy={{
+                                id: selectedStrategy,
+                                name: selectedStrategy === "dynamic_alpha" ? "Dynamic Sector Alpha"
+                                    : selectedStrategy === "horizon_parity" ? "Sector Baseline"
+                                    : selectedStrategy === "mag7_multiscale" ? "Mag 7 Multiscale"
+                                    : selectedStrategy === "quality_factor" ? "S&P 500 Quality Factor"
+                                    : "Mag 7 Risk Parity",
+                                cagr: currentMetrics.cagr,
+                                volatility: currentMetrics.volatility,
+                                sharpe: currentMetrics.sharpe,
+                                max_dd: currentMetrics.max_dd,
+                                ytd: currentMetrics.ytd,
+                            }}
+                        />
+                    </div>
+                </motion.section>
+
                 {/* Gating & Advanced Quant */}
-                <motion.section variants={itemVariants} className="max-w-3xl mx-auto w-full px-4 md:px-6 mt-4 text-center">
+                <motion.section variants={itemVariants} className="max-w-3xl mx-auto w-full px-4 md:px-6 mt-6 md:mt-8 text-center">
                     <motion.div
                         whileHover={{ scale: 1.01 }}
                         className="bg-gradient-to-br from-slate-900 to-slate-950 p-8 md:p-14 rounded-[1.5rem] md:rounded-[2rem] border border-slate-800 shadow-2xl relative overflow-hidden group"
