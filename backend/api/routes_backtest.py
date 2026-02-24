@@ -1,8 +1,14 @@
 from fastapi import APIRouter
-from services.data_loader import get_strategy_metrics, get_raw_returns_series, load_combined_equity_curve
+from services.data_loader import get_strategy_metrics, get_raw_returns_series, load_combined_equity_curve, DATA_STORE
 import numpy as np
+import os
 
 router = APIRouter()
+
+@router.get("/debug")
+def debug_paths():
+    files = os.listdir(DATA_STORE) if os.path.exists(DATA_STORE) else []
+    return {"data_store_path": DATA_STORE, "exists": os.path.exists(DATA_STORE), "files": files}
 
 @router.get("/metrics")
 def get_metrics():
