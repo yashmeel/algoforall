@@ -150,7 +150,7 @@ def load_combined_equity_curve(strategy_id: str):
 
     df_combined = pd.DataFrame(index=df_stgt.index)
     df_combined["STGT"] = df_stgt["Cumulative"]
-    df_combined["Baseline"] = df_base["Cumulative"].reindex(df_stgt.index).fillna(method="ffill")
+    df_combined["Baseline"] = df_base["Cumulative"].reindex(df_stgt.index).ffill()
     df_combined["Relative"] = ((1 + df_combined["STGT"]) / (1 + df_combined["Baseline"])) - 1
     df_combined = df_combined.reset_index()
 
