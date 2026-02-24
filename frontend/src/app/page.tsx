@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_URL } from '../lib/api';
 import StrategyCard from '../components/StrategyCard';
 import PerformanceTable from '../components/PerformanceTable';
 import ProjectionCalc from '../components/ProjectionCalc';
@@ -50,7 +51,7 @@ export default function Home() {
     const [chartPeriod, setChartPeriod] = useState<Period>('10y');
 
     useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/backtest/metrics`)
+        fetch(`${API_URL}/api/v1/backtest/metrics`)
             .then(r => r.json())
             .then(setMetrics)
             .catch(() => console.error('Failed to load metrics'));

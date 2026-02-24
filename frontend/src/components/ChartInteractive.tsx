@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { API_URL } from '../lib/api';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, Legend
@@ -46,7 +47,7 @@ export default function ChartInteractive({
             try {
                 setLoading(true);
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/backtest/equity-curve/${strategyId}`
+                    `${API_URL}/api/v1/backtest/equity-curve/${strategyId}`
                 );
                 const result = await response.json();
                 setAllData(result.timeseries || []);

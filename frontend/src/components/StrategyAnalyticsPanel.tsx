@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_URL } from '../lib/api';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -132,11 +133,10 @@ export default function StrategyAnalyticsPanel({
 
     useEffect(() => {
         setLoading(true);
-        const base = process.env.NEXT_PUBLIC_API_URL;
         Promise.all([
-            fetch(`${base}/api/v1/backtest/strategy/${strategyId}/performance`).then(r => r.json()),
-            fetch(`${base}/api/v1/backtest/equity-curve/${strategyId}`).then(r => r.json()),
-            fetch(`${base}/api/v1/backtest/strategy/${strategyId}/attribution`).then(r => r.json()),
+            fetch(`${API_URL}/api/v1/backtest/strategy/${strategyId}/performance`).then(r => r.json()),
+            fetch(`${API_URL}/api/v1/backtest/equity-curve/${strategyId}`).then(r => r.json()),
+            fetch(`${API_URL}/api/v1/backtest/strategy/${strategyId}/attribution`).then(r => r.json()),
         ])
             .then(([perfJson, curveJson, attribJson]) => {
                 setPerfData(perfJson.performance_analysis || []);

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { API_URL } from '../lib/api';
 
 interface ProjectionProps {
     stgtMetrics: { cagr: number; volatility: number };
@@ -34,7 +35,7 @@ export default function ProjectionCalc({ stgtMetrics, baseMetrics }: ProjectionP
         const fetchSimulation = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/simulation/simulate`, {
+                const res = await fetch(`${API_URL}/api/v1/simulation/simulate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

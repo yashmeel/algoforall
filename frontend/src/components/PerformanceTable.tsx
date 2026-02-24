@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { API_URL } from '../lib/api';
 
 interface PerformanceStat {
     period: string;
@@ -24,7 +25,7 @@ export default function PerformanceTable({ strategyId = 'sector_rotation' }) {
             try {
                 setLoading(true);
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/backtest/strategy/${strategyId}/performance`
+                    `${API_URL}/api/v1/backtest/strategy/${strategyId}/performance`
                 );
                 const data = await response.json();
                 setPerformanceData(data.performance_analysis || []);
