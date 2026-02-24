@@ -54,12 +54,13 @@ export default function ChartInteractive({ strategyId = 'dynamic_alpha' }) {
 
     const getNames = () => {
         switch (strategyId) {
-            case 'dynamic_alpha': return ["Dynamic Sector Alpha", "Sector Baseline"];
-            case 'horizon_parity': return ["Sector Baseline", "Sector Baseline"];
-            case 'mag7_multiscale': return ["Mag 7 Multiscale", "Mag 7 Risk Parity"];
-            case 'mag7_riskparity': return ["Mag 7 Risk Parity", "Mag 7 Risk Parity"];
-            case 'quality_factor': return ["S&P 500 Quality Factor", "S&P 500 Quality Factor"];
-            default: return ["Target Strategy", "Baseline"];
+            case 'sector_rotation': return ["Multiscale Sector Rotation", "Risk Parity Baseline"];
+            case 'large_cap_100':   return ["Multiscale Large Cap 100",   "Risk Parity Baseline"];
+            case 'mag7_momentum':   return ["Multiscale Mag 7",           "Risk Parity Baseline"];
+            case 'stgt_ensemble':   return ["STGT Ensemble",              "Sector Rotation"];
+            case 'risk_parity':     return ["Multi-Horizon Risk Parity",  "Risk Parity Baseline"];
+            case 'quality_factor':  return ["S&P 500 Quality",            "Risk Parity Baseline"];
+            default:                return ["Strategy", "Baseline"];
         }
     };
     const [targetName, baseName] = getNames();
