@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from services.data_loader import get_strategy_metrics, get_raw_returns_series, load_combined_equity_curve, DATA_STORE
+from services.data_loader import get_strategy_metrics, get_raw_returns_series, load_combined_equity_curve, compute_factor_attribution, DATA_STORE
 import numpy as np
 import os
 
@@ -84,3 +84,15 @@ async def get_strategy_performance(strategy_id: str):
         })
         
     return {"performance_analysis": response_data}
+
+
+@router.get("/strategy/{strategy_id}/attribution")
+def get_strategy_attribution(strategy_id: str):
+    """
+    OLS Factor Attribution: r = alpha + beta_mkt*SPY + beta_size*(IWM-SPY) + beta_value*(IVE-IVW)
+    Returns annualized alpha, market/size/value betas, R², tracking error, information ratio.
+    """
+    result = compute_factor_attribution(strategy_id)
+    if not result:
+        return {"error": "Attribution data unavailable", "strategy_id": strategy_id}
+    return result

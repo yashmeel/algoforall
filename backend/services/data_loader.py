@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import numpy as np
+from functools import lru_cache
 
 # Bind to Docker persistent volume path if present, otherwise calculate local path dynamically
 _local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data_store")
@@ -162,3 +163,119 @@ def load_combined_equity_curve(strategy_id: str):
     df_combined.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
 
     return {"timeseries": df_combined.to_dict(orient="records"), "metrics": metrics}
+
+
+# ── Factor Attribution ────────────────────────────────────────────────────────
+
+_FACTOR_CACHE_FILE = None  # set lazily
+
+def _get_factor_cache_path():
+    return os.path.join(DATA_STORE, "factor_returns.csv")
+
+
+def _load_or_download_factors() -> pd.DataFrame:
+    """
+    Load or download SPY/IWM/IVE/IVW daily log-returns.
+    Cached to data_store/factor_returns.csv on first call.
+    """
+    cache_path = _get_factor_cache_path()
+    if os.path.exists(cache_path):
+        df = pd.read_csv(cache_path, index_col=0, parse_dates=True)
+        return df
+
+    # Download from yfinance
+    try:
+        import yfinance as yf
+        tickers = ["SPY", "IWM", "IVE", "IVW"]
+        raw = yf.download(tickers, start="1999-01-01", end="2026-02-01",
+                          auto_adjust=True, progress=False)
+        if isinstance(raw.columns, pd.MultiIndex):
+            prices = raw["Close"]
+        else:
+            prices = raw
+        prices = prices.ffill().dropna()
+        log_returns = np.log(prices / prices.shift(1)).dropna()
+        log_returns.to_csv(cache_path)
+        return log_returns
+    except Exception as e:
+        return pd.DataFrame()
+
+
+def compute_factor_attribution(strategy_id: str) -> dict:
+    """
+    OLS factor attribution for a strategy vs Fama-French-style proxies.
+
+    Model:
+      r_t = alpha_d + beta_mkt * r_SPY + beta_size * (r_IWM - r_SPY)
+                    + beta_value * (r_IVE - r_IVW) + eps_t
+
+    Returns annualized alpha, market beta, size beta, value beta,
+    tracking error vs SPY, information ratio, and R-squared.
+    """
+    files = STRATEGY_FILES.get(strategy_id)
+    if not files:
+        return {}
+
+    df_strat = _load_raw_df(files[0])
+    if df_strat.empty:
+        return {}
+
+    strategy_returns = df_strat["Return"].dropna()
+
+    # Load factor returns
+    factors = _load_or_download_factors()
+    if factors.empty:
+        return {"error": "Factor data unavailable"}
+
+    # Align
+    aligned = strategy_returns.to_frame("strategy").join(factors, how="inner")
+    if len(aligned) < 60:
+        return {}
+
+    y = aligned["strategy"].values
+    spy = aligned.get("SPY", pd.Series(0.0, index=aligned.index)).values
+    iwm = aligned.get("IWM", pd.Series(0.0, index=aligned.index)).values
+    ive = aligned.get("IVE", pd.Series(0.0, index=aligned.index)).values
+    ivw = aligned.get("IVW", pd.Series(0.0, index=aligned.index)).values
+
+    smb = iwm - spy   # Small-minus-Big (size factor)
+    hml = ive - ivw   # High-minus-Low (value factor)
+
+    # Design matrix: [intercept, SPY, SMB, HML]
+    X = np.column_stack([np.ones(len(y)), spy, smb, hml])
+    try:
+        betas, residuals, _, _ = np.linalg.lstsq(X, y, rcond=None)
+    except np.linalg.LinAlgError:
+        return {}
+
+    alpha_daily = float(betas[0])
+    beta_mkt = float(betas[1])
+    beta_size = float(betas[2])
+    beta_value = float(betas[3])
+
+    # R-squared
+    y_pred = X @ betas
+    ss_res = float(np.sum((y - y_pred) ** 2))
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    r_squared = float(1.0 - ss_res / max(ss_tot, 1e-12))
+
+    # Tracking error & information ratio vs SPY
+    active = y - spy[: len(y)]
+    tracking_error = float(np.std(active) * np.sqrt(252) * 100)
+    ann_active = float(np.mean(active) * 252 * 100)
+    info_ratio = ann_active / tracking_error if tracking_error > 0 else 0.0
+
+    # Win rate
+    win_rate = float((y > 0).mean() * 100)
+
+    return {
+        "alpha_ann_pct": round(alpha_daily * 252 * 100, 2),
+        "beta_market": round(beta_mkt, 3),
+        "beta_size": round(beta_size, 3),
+        "beta_value": round(beta_value, 3),
+        "r_squared": round(max(0.0, r_squared), 4),
+        "tracking_error_pct": round(tracking_error, 2),
+        "information_ratio": round(info_ratio, 3),
+        "win_rate_pct": round(win_rate, 1),
+        "n_observations": int(len(y)),
+    }
