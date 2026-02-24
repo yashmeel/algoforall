@@ -160,10 +160,10 @@ export default function StrategyDetailPanel({ strategy }: Props) {
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
                             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 md:p-4">
-                                <StatCell label="Sharpe" value={advMetrics.sharpe.toFixed(2)} sub="Risk-adj return" color={advMetrics.sharpe >= 1 ? 'text-emerald-400' : 'text-slate-100'} />
+                                <StatCell label="Sharpe" value={advMetrics.sharpe.toFixed(2)} sub="Rf = 4%" color={advMetrics.sharpe >= 1 ? 'text-emerald-400' : 'text-slate-100'} />
                             </div>
                             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 md:p-4">
-                                <StatCell label="Sortino" value={advMetrics.sortino.toFixed(2)} sub="Downside-adj" color={advMetrics.sortino >= 1 ? 'text-emerald-400' : 'text-slate-100'} />
+                                <StatCell label="Sortino" value={advMetrics.sortino.toFixed(2)} sub="Rf = 4%, downside" color={advMetrics.sortino >= 1 ? 'text-emerald-400' : 'text-slate-100'} />
                             </div>
                             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 md:p-4">
                                 <StatCell label="Calmar" value={advMetrics.calmar.toFixed(2)} sub="Return / MaxDD" color={advMetrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-100'} />
@@ -172,7 +172,7 @@ export default function StrategyDetailPanel({ strategy }: Props) {
                                 <StatCell label="Info Ratio" value={advMetrics.information_ratio.toFixed(2)} sub="vs benchmark" color={advMetrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400'} />
                             </div>
                             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 md:p-4">
-                                <StatCell label="Alpha" value={`${advMetrics.alpha_pct > 0 ? '+' : ''}${advMetrics.alpha_pct.toFixed(2)}%`} sub="CAPM alpha" color={advMetrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400'} />
+                                <StatCell label="Alpha" value={`${advMetrics.alpha_pct > 0 ? '+' : ''}${advMetrics.alpha_pct.toFixed(2)}%`} sub="Ann. active return" color={advMetrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400'} />
                             </div>
                             <div className="bg-slate-900/60 border border-slate-800/60 rounded-xl p-3 md:p-4">
                                 <StatCell label="Beta" value={advMetrics.beta.toFixed(2)} sub="vs benchmark" />

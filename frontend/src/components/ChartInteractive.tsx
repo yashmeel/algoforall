@@ -89,8 +89,8 @@ export default function ChartInteractive({ strategyId = 'dynamic_alpha' }) {
                         className="grid grid-cols-4 sm:grid-cols-7 gap-px bg-slate-800/60 rounded-xl overflow-hidden border border-slate-800/60"
                     >
                         {[
-                            { label: 'Sharpe', value: metrics.sharpe.toFixed(2), color: metrics.sharpe >= 1 ? 'text-emerald-400' : 'text-slate-100' },
-                            { label: 'Sortino', value: metrics.sortino.toFixed(2), color: metrics.sortino >= 1 ? 'text-emerald-400' : 'text-slate-100' },
+                            { label: 'Sharpe (Rf=4%)', value: metrics.sharpe.toFixed(2), color: metrics.sharpe >= 1 ? 'text-emerald-400' : 'text-slate-100' },
+                            { label: 'Sortino (Rf=4%)', value: metrics.sortino.toFixed(2), color: metrics.sortino >= 1 ? 'text-emerald-400' : 'text-slate-100' },
                             { label: 'Calmar', value: metrics.calmar.toFixed(2), color: metrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-100' },
                             { label: 'Info Ratio', value: metrics.information_ratio.toFixed(2), color: metrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400' },
                             { label: 'Alpha', value: `${metrics.alpha_pct > 0 ? '+' : ''}${metrics.alpha_pct.toFixed(1)}%`, color: metrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400' },
@@ -98,7 +98,7 @@ export default function ChartInteractive({ strategyId = 'dynamic_alpha' }) {
                             { label: 'DD Days', value: `${metrics.max_dd_duration}d`, color: 'text-rose-300' },
                         ].map((m, i) => (
                             <div key={i} className="bg-slate-950/60 px-2 py-2 flex flex-col items-center justify-center text-center">
-                                <p className="text-[0.55rem] uppercase text-slate-500 font-bold tracking-wider leading-none mb-1">{m.label}</p>
+                                <p className="text-[0.55rem] uppercase text-slate-500 font-bold tracking-wider leading-none mb-1 whitespace-nowrap">{m.label}</p>
                                 <p className={`text-xs sm:text-sm font-black leading-none ${m.color}`}>{m.value}</p>
                             </div>
                         ))}

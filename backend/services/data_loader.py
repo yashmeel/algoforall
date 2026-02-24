@@ -6,6 +6,10 @@ import numpy as np
 _local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data_store")
 DATA_STORE = os.getenv("DATA_STORE_PATH", _local_path)
 
+# Current US risk-free rate (approximate Fed Funds / T-Bill yield).
+# Update this periodically as rates change.
+RISK_FREE_RATE = 0.04  # 4.0% annualized
+
 def get_strategy_metrics():
     """Dynamically calculates the exact CAGR mathematically to match the Performance Table."""
     names = {
@@ -22,9 +26,10 @@ def get_strategy_metrics():
         yrs = len(returns) / 252.0
         cagr = (cm ** (1 / yrs) - 1) * 100 if yrs > 0 else 0
         
-        # Volatility & Sharpe
+        # Volatility & Sharpe (risk-free rate adjusted)
         ann_vol = returns.std() * np.sqrt(252)
-        sharpe = (returns.mean() * 252) / ann_vol if ann_vol > 0 else 0
+        ann_ret_approx = returns.mean() * 252
+        sharpe = (ann_ret_approx - RISK_FREE_RATE) / ann_vol if ann_vol > 0 else 0
         
         # Max Drawdown
         cum_ret = np.exp(returns.cumsum())
@@ -121,16 +126,16 @@ def load_combined_equity_curve(strategy_id: str):
     
     # Annualized Volatility
     ann_vol = target_returns.std() * np.sqrt(252)
-    # Annualized Return (CAGR approximation for scaling)
+    # Annualized Return (arithmetic approximation, used for ratio numerators)
     ann_ret = target_returns.mean() * 252
-    
-    # 1. Sharpe Ratio (Risk-Free = 0%)
-    sharpe = ann_ret / ann_vol if ann_vol > 0 else 0
-    
-    # 1.5 Sortino Ratio (Downside Risk Only)
+
+    # 1. Sharpe Ratio (risk-free rate adjusted)
+    sharpe = (ann_ret - RISK_FREE_RATE) / ann_vol if ann_vol > 0 else 0
+
+    # 1.5 Sortino Ratio (downside risk only, risk-free rate adjusted)
     downside_returns = target_returns[target_returns < 0]
     downside_vol = downside_returns.std() * np.sqrt(252)
-    sortino = ann_ret / downside_vol if downside_vol > 0 else 0
+    sortino = (ann_ret - RISK_FREE_RATE) / downside_vol if downside_vol > 0 else 0
     
     # 2. Information Ratio (Active Return / Tracking Error)
     active_returns = target_returns - base_returns
