@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.env
+*.log
+
+# Node
+node_modules/
+.next/
+.env.local
+.env.production
+
+# Data (committed intentionally - small CSVs)
+# backend/data_store/ is included
+
+# Misc
+.DS_Store
+*.swp
+build_output.txt
+temp_end.txt
+web.log
+api.log
