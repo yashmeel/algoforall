@@ -115,7 +115,7 @@ export default function ChartInteractive({
 
             {/* Header: title + period toggle */}
             <div className="flex-shrink-0 mb-3 relative z-10">
-                <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
                     <h3 className="text-base md:text-lg font-display font-bold text-white tracking-tight">
                         Cumulative Performance
                     </h3>
@@ -136,36 +136,13 @@ export default function ChartInteractive({
                         ))}
                     </div>
                 </div>
-
-                {/* Metrics strip — full-history stats */}
-                {metrics && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="grid grid-cols-4 sm:grid-cols-7 gap-px bg-slate-800/60 rounded-xl overflow-hidden border border-slate-800/60"
-                    >
-                        {[
-                            { label: 'Sharpe',     value: metrics.sharpe.toFixed(2),           color: metrics.sharpe >= 1 ? 'text-emerald-400' : 'text-slate-100' },
-                            { label: 'Sortino',    value: metrics.sortino.toFixed(2),           color: metrics.sortino >= 1 ? 'text-emerald-400' : 'text-slate-100' },
-                            { label: 'Calmar',     value: metrics.calmar.toFixed(2),            color: metrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-100' },
-                            { label: 'Info Ratio', value: metrics.information_ratio.toFixed(2), color: metrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400' },
-                            { label: 'Alpha',      value: `${metrics.alpha_pct > 0 ? '+' : ''}${metrics.alpha_pct.toFixed(1)}%`, color: metrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400' },
-                            { label: 'Beta',       value: metrics.beta.toFixed(2),              color: 'text-slate-200' },
-                            { label: 'DD Days',    value: `${metrics.max_dd_duration}d`,        color: 'text-rose-300' },
-                        ].map((m, i) => (
-                            <div key={i} className="bg-slate-950/60 px-2 py-2 flex flex-col items-center justify-center text-center">
-                                <p className="text-[0.5rem] uppercase text-slate-500 font-bold tracking-wider leading-none mb-1 whitespace-nowrap">{m.label}</p>
-                                <p className={`text-xs font-black leading-none ${m.color}`}>{m.value}</p>
-                            </div>
-                        ))}
-                    </motion.div>
-                )}
             </div>
 
             {/* Chart — flex-1 + min-h-0 is the CRITICAL fix.
                 min-h-0 overrides default min-height:auto on flex items,
-                allowing ResponsiveContainer to measure real pixel height. */}
-            <div className="flex-1 min-h-0 w-full">
+                allowing ResponsiveContainer to measure real pixel height.
+                relative so stats overlay can be positioned inside. */}
+            <div className="flex-1 min-h-0 w-full relative">
                 {loading ? (
                     <div className="w-full h-full flex items-center justify-center">
                         <motion.div
@@ -182,6 +159,44 @@ export default function ChartInteractive({
                         No data for {period.toUpperCase()} window
                     </div>
                 ) : (
+                    {/* Stats overlay — top-right corner inside chart */}
+                    {metrics && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="absolute top-0 right-0 z-10 flex flex-col gap-1 pointer-events-none"
+                        >
+                            {/* Row 1: Sharpe, Sortino, Calmar */}
+                            <div className="flex gap-1">
+                                {[
+                                    { label: 'Sharpe',  value: metrics.sharpe.toFixed(2),  color: metrics.sharpe >= 1 ? 'text-emerald-400' : 'text-slate-200' },
+                                    { label: 'Sortino', value: metrics.sortino.toFixed(2), color: metrics.sortino >= 1 ? 'text-emerald-400' : 'text-slate-200' },
+                                    { label: 'Calmar',  value: metrics.calmar.toFixed(2),  color: metrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-200' },
+                                ].map((m, i) => (
+                                    <div key={i} className="bg-slate-950/80 backdrop-blur-sm border border-slate-700/60 rounded-lg px-2 py-1.5 flex flex-col items-center min-w-[46px]">
+                                        <p className="text-[0.45rem] uppercase text-slate-500 font-bold tracking-wider leading-none mb-0.5 whitespace-nowrap">{m.label}</p>
+                                        <p className={`text-[0.65rem] font-black leading-none ${m.color}`}>{m.value}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            {/* Row 2: Info Ratio, Alpha, Beta, DD Days */}
+                            <div className="flex gap-1">
+                                {[
+                                    { label: 'Info Ratio', value: metrics.information_ratio.toFixed(2), color: metrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400' },
+                                    { label: 'Alpha',      value: `${metrics.alpha_pct > 0 ? '+' : ''}${metrics.alpha_pct.toFixed(1)}%`, color: metrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400' },
+                                    { label: 'Beta',       value: metrics.beta.toFixed(2),              color: 'text-slate-200' },
+                                    { label: 'DD Days',    value: `${metrics.max_dd_duration}d`,        color: 'text-rose-300' },
+                                ].map((m, i) => (
+                                    <div key={i} className="bg-slate-950/80 backdrop-blur-sm border border-slate-700/60 rounded-lg px-2 py-1.5 flex flex-col items-center min-w-[46px]">
+                                        <p className="text-[0.45rem] uppercase text-slate-500 font-bold tracking-wider leading-none mb-0.5 whitespace-nowrap">{m.label}</p>
+                                        <p className={`text-[0.65rem] font-black leading-none ${m.color}`}>{m.value}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data} margin={{ top: 5, right: 10, left: 5, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
