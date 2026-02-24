@@ -48,18 +48,18 @@ export default function ProjectionCalc({ stgtMetrics, baseMetrics }: ProjectionP
     }, [initialInvest, monthlyContrib, stgtMetrics.cagr, stgtMetrics.volatility, baseMetrics.cagr, baseMetrics.volatility]);
 
     return (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-2xl">
-            <div className="mb-6 border-b border-slate-800 pb-4">
-                <h3 className="text-xl font-bold text-white">10-Year Interactive Wealth Projection</h3>
-                <p className="text-sm text-slate-400 mt-1">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 md:p-6 shadow-2xl">
+            <div className="mb-4 md:mb-6 border-b border-slate-800 pb-3 md:pb-4">
+                <h3 className="text-base md:text-xl font-bold text-white">10-Year Wealth Projection</h3>
+                <p className="text-xs text-slate-400 mt-1 hidden sm:block">
                     Dual 1,000-path Monte Carlo distribution (STGT vs Baseline).
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="md:col-span-1 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-8">
+                <div className="md:col-span-1 space-y-4 md:space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-xs md:text-sm font-medium text-slate-300 mb-1.5 md:mb-2">
                             Initial Investment: ${initialInvest.toLocaleString()}
                         </label>
                         <input
@@ -73,7 +73,7 @@ export default function ProjectionCalc({ stgtMetrics, baseMetrics }: ProjectionP
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                        <label className="block text-xs md:text-sm font-medium text-slate-300 mb-1.5 md:mb-2">
                             Monthly Contribution: ${monthlyContrib.toLocaleString()}
                         </label>
                         <input
@@ -87,9 +87,9 @@ export default function ProjectionCalc({ stgtMetrics, baseMetrics }: ProjectionP
                         />
                     </div>
 
-                    <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
-                        <h4 className="text-xs font-semibold uppercase text-slate-500 mb-3">Model Parameters</h4>
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-950 p-3 md:p-4 rounded-lg border border-slate-800">
+                        <h4 className="text-xs font-semibold uppercase text-slate-500 mb-2 md:mb-3">Model Parameters</h4>
+                        <div className="grid grid-cols-2 gap-3 md:gap-4">
                             <div>
                                 <h5 className="text-[10px] text-emerald-500 uppercase font-bold mb-1 tracking-wider border-b border-emerald-900/50 pb-1">STGT</h5>
                                 <div className="text-xs text-slate-300">CAGR: <span className="text-white font-bold">{stgtMetrics.cagr}%</span></div>
@@ -104,7 +104,7 @@ export default function ProjectionCalc({ stgtMetrics, baseMetrics }: ProjectionP
                     </div>
                 </div>
 
-                <div className="md:col-span-2 h-[350px] relative">
+                <div className="md:col-span-2 h-[260px] sm:h-[320px] md:h-[350px] relative">
                     {loading && (
                         <div className="absolute inset-0 z-10 bg-slate-900/50 flex items-center justify-center">
                             <span className="text-emerald-500 animate-pulse font-semibold">Simulating 2,000 paths...</span>

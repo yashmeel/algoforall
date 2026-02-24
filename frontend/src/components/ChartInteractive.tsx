@@ -94,64 +94,67 @@ export default function ChartInteractive({ strategyId = 'dynamic_alpha' }) {
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mt-4 bg-slate-950/50 p-4 rounded-xl border border-slate-800/80 grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-slate-800/60"
+                        className="mt-3 bg-slate-950/50 p-3 md:p-4 rounded-xl border border-slate-800/80"
                     >
-                        {/* Group 1: Risk-Adjusted Returns */}
-                        <div className="flex flex-col gap-3 pt-2 md:pt-0 md:pl-0">
-                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Risk-Adjusted
-                            </h4>
-                            <div className="grid grid-cols-3 gap-2">
-                                <div>
-                                    <p className="text-[0.65rem] uppercase text-slate-500 font-bold tracking-widest">Sharpe</p>
-                                    <p className="text-lg font-black text-slate-100">{metrics.sharpe.toFixed(2)}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[0.65rem] uppercase text-slate-500 font-bold tracking-widest" title="Downside Risk Adjusted">Sortino</p>
-                                    <p className={`text-lg font-black ${metrics.sortino >= 1.0 ? 'text-emerald-400' : 'text-slate-100'}`}>{metrics.sortino.toFixed(2)}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[0.65rem] uppercase text-slate-500 font-bold tracking-widest" title="Return / Max Drawdown">Calmar</p>
-                                    <p className={`text-lg font-black ${metrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-100'}`}>{metrics.calmar.toFixed(2)}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Group 2: Benchmark Relative */}
-                        <div className="flex flex-col gap-3 pt-4 md:pt-0 md:pl-6">
-                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span> Relative Profile
-                            </h4>
-                            <div className="grid grid-cols-3 gap-2">
-                                <div>
-                                    <p className="text-[0.65rem] uppercase text-slate-500 font-bold tracking-widest">Info Ratio</p>
-                                    <p className={`text-lg font-black ${metrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400'}`}>
-                                        {metrics.information_ratio.toFixed(2)}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-[0.65rem] uppercase text-slate-500 font-bold tracking-widest">True Alpha</p>
-                                    <p className={`text-lg font-black ${metrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400'}`}>
-                                        {metrics.alpha_pct > 0 ? '+' : ''}{metrics.alpha_pct.toFixed(2)}%
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-[0.65rem] uppercase text-slate-500 font-bold tracking-widest">Beta v SPY</p>
-                                    <p className="text-lg font-black text-slate-300">{metrics.beta.toFixed(2)}</p>
+                        {/* Mobile: compact 3x3 grid, Desktop: 3 column with dividers */}
+                        <div className="grid grid-cols-3 md:grid-cols-3 gap-x-2 gap-y-3 md:gap-6 md:divide-x divide-slate-800/60">
+                            {/* Risk-Adjusted */}
+                            <div className="col-span-3 md:col-span-1 md:pl-0">
+                                <h4 className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Risk-Adjusted
+                                </h4>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Sharpe</p>
+                                        <p className="text-base md:text-lg font-black text-slate-100">{metrics.sharpe.toFixed(2)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Sortino</p>
+                                        <p className={`text-base md:text-lg font-black ${metrics.sortino >= 1.0 ? 'text-emerald-400' : 'text-slate-100'}`}>{metrics.sortino.toFixed(2)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Calmar</p>
+                                        <p className={`text-base md:text-lg font-black ${metrics.calmar >= 0.5 ? 'text-emerald-400' : 'text-slate-100'}`}>{metrics.calmar.toFixed(2)}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Group 3: Risk Profile */}
-                        <div className="flex flex-col gap-3 pt-4 md:pt-0 md:pl-6">
-                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Stress Metrics
-                            </h4>
-                            <div className="grid grid-cols-1 gap-2">
+                            {/* Border separator on mobile */}
+                            <div className="col-span-3 border-t border-slate-800/60 md:hidden"></div>
+                            {/* Relative Profile */}
+                            <div className="col-span-3 md:col-span-1 md:pl-6">
+                                <h4 className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0"></span> Relative
+                                </h4>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Info Ratio</p>
+                                        <p className={`text-base md:text-lg font-black ${metrics.information_ratio >= 0 ? 'text-violet-400' : 'text-rose-400'}`}>
+                                            {metrics.information_ratio.toFixed(2)}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Alpha</p>
+                                        <p className={`text-base md:text-lg font-black ${metrics.alpha_pct >= 0 ? 'text-violet-400' : 'text-rose-400'}`}>
+                                            {metrics.alpha_pct > 0 ? '+' : ''}{metrics.alpha_pct.toFixed(2)}%
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Beta</p>
+                                        <p className="text-base md:text-lg font-black text-slate-300">{metrics.beta.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Border separator on mobile */}
+                            <div className="col-span-3 border-t border-slate-800/60 md:hidden"></div>
+                            {/* Stress */}
+                            <div className="col-span-3 md:col-span-1 md:pl-6">
+                                <h4 className="text-[0.6rem] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span> Stress
+                                </h4>
                                 <div>
-                                    <p className="text-[0.65rem] uppercase text-slate-500 font-bold tracking-widest">Max Drawdown Duration</p>
-                                    <p className="text-lg font-black text-slate-300">
-                                        {metrics.max_dd_duration} <span className="text-xs text-slate-500 font-medium">Trading Days</span>
+                                    <p className="text-[0.6rem] uppercase text-slate-500 font-bold tracking-widest">Max DD Duration</p>
+                                    <p className="text-base md:text-lg font-black text-slate-300">
+                                        {metrics.max_dd_duration} <span className="text-xs text-slate-500 font-medium">Days</span>
                                     </p>
                                 </div>
                             </div>
@@ -160,7 +163,7 @@ export default function ChartInteractive({ strategyId = 'dynamic_alpha' }) {
                 )}
             </div>
 
-            <div className="flex-1 min-h-[400px] w-full mt-2">
+            <div className="flex-1 min-h-[260px] md:min-h-[380px] w-full mt-2">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
