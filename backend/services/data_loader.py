@@ -86,28 +86,45 @@ def get_raw_returns_series(strategy_id: str):
     return df["Return"]
 
 
+def _get_spy_returns() -> pd.Series:
+    """
+    Returns SPY daily log-returns from the factor cache (already downloaded
+    for FF5 attribution). Falls back to an empty Series if unavailable.
+    """
+    factors = _load_or_download_factors()
+    if factors.empty or "SPY" not in factors.columns:
+        return pd.Series(dtype=float)
+    return factors["SPY"].dropna()
+
+
 def load_combined_equity_curve(strategy_id: str):
     """
     Returns merged cumulative returns timeseries + advanced metrics
     for the ChartInteractive.tsx component.
+    Baseline is SPY (S&P 500) — aligned to the strategy date range.
     """
     files = STRATEGY_FILES.get(strategy_id, STRATEGY_FILES["sector_rotation"])
-    target_file, base_file = files
+    target_file = files[0]
 
     df_stgt = _load_raw_df(target_file)
-    df_base = _load_raw_df(base_file)
-
-    if df_stgt.empty or df_base.empty:
+    if df_stgt.empty:
         return {"timeseries": [], "metrics": {}}
 
+    # Use SPY as the universal benchmark
+    spy_returns = _get_spy_returns()
+    if spy_returns.empty:
+        return {"timeseries": [], "metrics": {}}
+
+    # Align SPY to strategy index (inner join on dates)
     df_stgt["Cumulative"] = np.exp(df_stgt["Return"].cumsum()) - 1
-    df_base["Cumulative"] = np.exp(df_base["Return"].cumsum()) - 1
+    spy_aligned = spy_returns.reindex(df_stgt.index).ffill().dropna()
+
+    # Trim strategy to dates where SPY is available
+    df_stgt = df_stgt.loc[spy_aligned.index]
+    spy_cum = np.exp(spy_aligned.cumsum()) - 1
 
     target_returns = df_stgt["Return"].copy()
-    base_returns = df_base["Return"].copy()
-    min_len = min(len(target_returns), len(base_returns))
-    target_returns = target_returns.iloc[:min_len]
-    base_returns = base_returns.iloc[:min_len]
+    base_returns = spy_aligned.copy()
 
     ann_vol = target_returns.std() * np.sqrt(252)
     ann_ret = target_returns.mean() * 252
@@ -150,7 +167,7 @@ def load_combined_equity_curve(strategy_id: str):
 
     df_combined = pd.DataFrame(index=df_stgt.index)
     df_combined["STGT"] = df_stgt["Cumulative"]
-    df_combined["Baseline"] = df_base["Cumulative"].reindex(df_stgt.index).ffill()
+    df_combined["Baseline"] = spy_cum
     df_combined["Relative"] = ((1 + df_combined["STGT"]) / (1 + df_combined["Baseline"])) - 1
     df_combined = df_combined.reset_index()
 

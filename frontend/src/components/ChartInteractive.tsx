@@ -83,13 +83,13 @@ export default function ChartInteractive({
 
     const getNames = (): [string, string] => {
         switch (strategyId) {
-            case 'sector_rotation': return ['Multiscale Sector Rotation', 'Risk Parity Baseline'];
-            case 'large_cap_100':   return ['Multiscale Large Cap 100',   'Risk Parity Baseline'];
-            case 'mag7_momentum':   return ['Multiscale Mag 7',           'Risk Parity Baseline'];
-            case 'stgt_ensemble':   return ['STGT Ensemble',              'Sector Rotation'];
-            case 'risk_parity':     return ['Multi-Horizon Risk Parity',  'Risk Parity Baseline'];
-            case 'quality_factor':  return ['S&P 500 Quality',            'Risk Parity Baseline'];
-            default:                return ['Strategy', 'Baseline'];
+            case 'sector_rotation': return ['Multiscale Sector Rotation', 'S&P 500 (SPY)'];
+            case 'large_cap_100':   return ['Multiscale Large Cap 100',   'S&P 500 (SPY)'];
+            case 'mag7_momentum':   return ['Multiscale Mag 7',           'S&P 500 (SPY)'];
+            case 'stgt_ensemble':   return ['STGT Ensemble',              'S&P 500 (SPY)'];
+            case 'risk_parity':     return ['Multi-Horizon Risk Parity',  'S&P 500 (SPY)'];
+            case 'quality_factor':  return ['S&P 500 Quality',            'S&P 500 (SPY)'];
+            default:                return ['Strategy',                   'S&P 500 (SPY)'];
         }
     };
     const [targetName, baseName] = getNames();
