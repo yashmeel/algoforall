@@ -91,10 +91,12 @@ export default function Home() {
                             Equity Models
                         </a>
                         <a
-                            href="#sports-arb"
-                            className="px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all"
+                            href="https://algoforall-arbedge.onrender.com/arb"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/30 transition-all"
                         >
-                            Sports Book Arb
+                            Sports Book Arb ↗
                         </a>
                     </div>
                 </div>
@@ -303,32 +305,6 @@ export default function Home() {
                             </div>
                         </div>
                     </motion.div>
-                </motion.section>
-                {/* ── Sports Book Arb ──────────────────────────────────────── */}
-                <motion.section
-                    id="sports-arb"
-                    variants={itemVariants}
-                    className="w-full mt-16 md:mt-24"
-                >
-                    {/* Section label */}
-                    <div className="text-center mb-6 px-4">
-                        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">
-                            Live Tool
-                        </div>
-                        <h2 className="font-display text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-emerald-100 to-emerald-500 tracking-tighter">
-                            Sports Book Arb
-                        </h2>
-                    </div>
-
-                    {/* Full-width embedded scanner */}
-                    <div className="w-full border-t border-slate-800/60" style={{ height: '90vh' }}>
-                        <iframe
-                            src="https://algoforall-arbedge.onrender.com/arb"
-                            className="w-full h-full"
-                            style={{ border: 'none', display: 'block' }}
-                            title="AlgoForAll ArbEdge Scanner"
-                        />
-                    </div>
                 </motion.section>
 
             </motion.div>
