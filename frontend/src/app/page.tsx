@@ -308,85 +308,26 @@ export default function Home() {
                 <motion.section
                     id="sports-arb"
                     variants={itemVariants}
-                    className="px-4 md:px-6 max-w-[1600px] mx-auto w-full mt-16 md:mt-24 mb-8"
+                    className="w-full mt-16 md:mt-24"
                 >
-                    {/* Section header */}
-                    <div className="text-center mb-10 relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[500px] h-[120px] md:h-[200px] bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
-                        <div className="relative">
-                            <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">
-                                Live Tool
-                            </div>
-                            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-emerald-100 to-emerald-500 tracking-tighter mb-4">
-                                Sports Book Arb
-                            </h2>
-                            <p className="text-base md:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed font-light">
-                                Scan 30+ sportsbooks in real time. Find guaranteed-profit arbitrage opportunities across player props.
-                            </p>
+                    {/* Section label */}
+                    <div className="text-center mb-6 px-4">
+                        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">
+                            Live Tool
                         </div>
+                        <h2 className="font-display text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-emerald-100 to-emerald-500 tracking-tighter">
+                            Sports Book Arb
+                        </h2>
                     </div>
 
-                    {/* Feature cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-3xl mx-auto">
-                        {[
-                            { icon: '⚡', title: 'On-Demand Only', desc: 'Fetches only when you click — no credit waste, no auto-polling.' },
-                            { icon: '🎯', title: '1–10% Real Arbs', desc: 'RapidFuzz name matching across books. $5-rounded stakes, deep links.' },
-                            { icon: '📊', title: '17 Prop Markets', desc: 'Points, rebounds, assists, passing yards, strikeouts and more.' },
-                        ].map(({ icon, title, desc }) => (
-                            <div key={title} className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5 backdrop-blur-sm">
-                                <div className="text-2xl mb-3">{icon}</div>
-                                <h3 className="text-sm font-bold text-slate-200 mb-1.5">{title}</h3>
-                                <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Stats row */}
-                    <div className="flex flex-wrap justify-center gap-6 mb-10 text-center">
-                        {[
-                            { val: '30+', label: 'Sportsbooks' },
-                            { val: '17',  label: 'Prop Markets' },
-                            { val: '1–10%', label: 'Arb Range' },
-                            { val: '$5',  label: 'Stake Rounding' },
-                        ].map(({ val, label }) => (
-                            <div key={label}>
-                                <div className="text-2xl font-black text-emerald-400">{val}</div>
-                                <div className="text-xs text-slate-500 uppercase tracking-widest mt-0.5">{label}</div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* CTA card */}
-                    <div className="max-w-lg mx-auto">
-                        <motion.div
-                            whileHover={{ scale: 1.01 }}
-                            className="bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/20 rounded-2xl p-8 text-center relative overflow-hidden group shadow-2xl"
-                        >
-                            <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-                            <div className="relative z-10">
-                                <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/50">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M7 17L14 10L20 17" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                        <path d="M9.5 13.5H18.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-black text-white mb-2">AlgoForAll ArbEdge</h3>
-                                <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                                    Live player prop arbitrage scanner. Runs locally — start the backend then open the scanner.
-                                </p>
-                                <a
-                                    href="https://algoforall-arbedge.onrender.com/arb"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-xl shadow-emerald-900/40 text-sm"
-                                >
-                                    Open Arb Scanner
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </motion.div>
+                    {/* Full-width embedded scanner */}
+                    <div className="w-full border-t border-slate-800/60" style={{ height: '90vh' }}>
+                        <iframe
+                            src="https://algoforall-arbedge.onrender.com/arb"
+                            className="w-full h-full"
+                            style={{ border: 'none', display: 'block' }}
+                            title="AlgoForAll ArbEdge Scanner"
+                        />
                     </div>
                 </motion.section>
 
