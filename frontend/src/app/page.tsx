@@ -91,12 +91,10 @@ export default function Home() {
                             Equity Models
                         </a>
                         <a
-                            href="https://algoforall-arbedge.onrender.com/arb"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href="#sports-arb"
                             className="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/30 transition-all"
                         >
-                            Sports Book Arb ↗
+                            Sports Book Arb
                         </a>
                     </div>
                 </div>
@@ -306,6 +304,23 @@ export default function Home() {
                         </div>
                     </motion.div>
                 </motion.section>
+
+                {/* ── Sports Book Arb ──────────────────────────────────── */}
+                <section id="sports-arb" className="w-full mt-20">
+                    <div className="text-center py-8 px-4">
+                        <h2 className="font-display text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-emerald-100 to-emerald-500 tracking-tighter">
+                            Sports Book Arb
+                        </h2>
+                        <p className="text-slate-400 text-sm mt-2">Live arbitrage scanner — data loaded from cache</p>
+                    </div>
+                    <div className="w-full" style={{ height: '90vh' }}>
+                        <iframe
+                            src="https://algoforall-arbedge.onrender.com/arb"
+                            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                            title="AlgoForAll Sports Book Arb Scanner"
+                        />
+                    </div>
+                </section>
 
             </motion.div>
         </div>
