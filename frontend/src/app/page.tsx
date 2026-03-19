@@ -69,6 +69,37 @@ export default function Home() {
                 style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, rgba(15,23,42,0) 60%)' }}
             />
 
+            {/* ── Top Nav ──────────────────────────────────────────────────── */}
+            <nav className="sticky top-0 z-50 w-full border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-md">
+                <div className="max-w-[1600px] mx-auto px-4 md:px-6 h-14 flex items-center justify-between gap-6">
+                    {/* Brand */}
+                    <div className="flex items-center gap-2.5 shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M4 12L8 4L12 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M5.5 9.5H10.5" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                            </svg>
+                        </div>
+                        <span className="font-black text-white text-base tracking-tight">AlgoForAll</span>
+                    </div>
+                    {/* Section links */}
+                    <div className="flex items-center gap-1">
+                        <a
+                            href="#equity-models"
+                            className="px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all"
+                        >
+                            Equity Models
+                        </a>
+                        <a
+                            href="#sports-arb"
+                            className="px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all"
+                        >
+                            Sports Book Arb
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
             <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -77,6 +108,7 @@ export default function Home() {
             >
                 {/* ── Hero ─────────────────────────────────────────────────── */}
                 <motion.section
+                    id="equity-models"
                     variants={itemVariants}
                     className="pt-16 md:pt-24 pb-8 px-4 md:px-6 max-w-[1600px] mx-auto w-full"
                 >
@@ -272,6 +304,93 @@ export default function Home() {
                         </div>
                     </motion.div>
                 </motion.section>
+                {/* ── Sports Book Arb ──────────────────────────────────────── */}
+                <motion.section
+                    id="sports-arb"
+                    variants={itemVariants}
+                    className="px-4 md:px-6 max-w-[1600px] mx-auto w-full mt-16 md:mt-24 mb-8"
+                >
+                    {/* Section header */}
+                    <div className="text-center mb-10 relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[500px] h-[120px] md:h-[200px] bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
+                        <div className="relative">
+                            <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">
+                                Live Tool
+                            </div>
+                            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-emerald-100 to-emerald-500 tracking-tighter mb-4">
+                                Sports Book Arb
+                            </h2>
+                            <p className="text-base md:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed font-light">
+                                Scan 30+ sportsbooks in real time. Find guaranteed-profit arbitrage opportunities across player props.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Feature cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-3xl mx-auto">
+                        {[
+                            { icon: '⚡', title: 'On-Demand Only', desc: 'Fetches only when you click — no credit waste, no auto-polling.' },
+                            { icon: '🎯', title: '1–10% Real Arbs', desc: 'RapidFuzz name matching across books. $5-rounded stakes, deep links.' },
+                            { icon: '📊', title: '17 Prop Markets', desc: 'Points, rebounds, assists, passing yards, strikeouts and more.' },
+                        ].map(({ icon, title, desc }) => (
+                            <div key={title} className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5 backdrop-blur-sm">
+                                <div className="text-2xl mb-3">{icon}</div>
+                                <h3 className="text-sm font-bold text-slate-200 mb-1.5">{title}</h3>
+                                <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="flex flex-wrap justify-center gap-6 mb-10 text-center">
+                        {[
+                            { val: '30+', label: 'Sportsbooks' },
+                            { val: '17',  label: 'Prop Markets' },
+                            { val: '1–10%', label: 'Arb Range' },
+                            { val: '$5',  label: 'Stake Rounding' },
+                        ].map(({ val, label }) => (
+                            <div key={label}>
+                                <div className="text-2xl font-black text-emerald-400">{val}</div>
+                                <div className="text-xs text-slate-500 uppercase tracking-widest mt-0.5">{label}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* CTA card */}
+                    <div className="max-w-lg mx-auto">
+                        <motion.div
+                            whileHover={{ scale: 1.01 }}
+                            className="bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/20 rounded-2xl p-8 text-center relative overflow-hidden group shadow-2xl"
+                        >
+                            <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                            <div className="relative z-10">
+                                <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-900/50">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                        <path d="M7 17L14 10L20 17" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M9.5 13.5H18.5" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-black text-white mb-2">AlgoForAll ArbEdge</h3>
+                                <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                                    Live player prop arbitrage scanner. Runs locally — start the backend then open the scanner.
+                                </p>
+                                <a
+                                    href="http://localhost:8000/arb"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-xl shadow-emerald-900/40 text-sm"
+                                >
+                                    Open Arb Scanner
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                                    </svg>
+                                </a>
+                                <p className="text-xs text-slate-600 mt-3">Run: <code className="text-slate-500">cd oddsshopper/backend && python3 main.py</code></p>
+                            </div>
+                        </motion.div>
+                    </div>
+                </motion.section>
+
             </motion.div>
         </div>
     );

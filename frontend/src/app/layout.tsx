@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' })
 
 export const metadata: Metadata = {
-    title: 'Quant Portal',
-    description: 'Institutional Full-Stack Quant Architecture',
+    title: 'AlgoForAll',
+    description: 'Quantitative equity models and sports book arbitrage — AlgoForAll',
 }
 
 export default function RootLayout({
