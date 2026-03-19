@@ -375,7 +375,7 @@ export default function Home() {
                                     Live player prop arbitrage scanner. Runs locally — start the backend then open the scanner.
                                 </p>
                                 <a
-                                    href="http://localhost:8000/arb"
+                                    href="https://algoforall-arbedge.onrender.com/arb"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-xl shadow-emerald-900/40 text-sm"
@@ -385,7 +385,6 @@ export default function Home() {
                                         <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                                     </svg>
                                 </a>
-                                <p className="text-xs text-slate-600 mt-3">Run: <code className="text-slate-500">cd oddsshopper/backend && python3 main.py</code></p>
                             </div>
                         </motion.div>
                     </div>
