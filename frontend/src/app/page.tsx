@@ -305,22 +305,29 @@ export default function Home() {
                     </motion.div>
                 </motion.section>
 
-                {/* ── Sports Book Arb ──────────────────────────────────── */}
-                <section id="sports-arb" className="w-full mt-20">
-                    <div className="text-center py-8 px-4">
+                {/* ── Sports Book Arb ──────────────────────────────────────── */}
+                <motion.section
+                    id="sports-arb"
+                    variants={itemVariants}
+                    className="w-full mt-16 md:mt-24"
+                >
+                    <div className="text-center mb-6 px-4">
+                        <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">
+                            Live Tool
+                        </div>
                         <h2 className="font-display text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-emerald-100 to-emerald-500 tracking-tighter">
                             Sports Book Arb
                         </h2>
-                        <p className="text-slate-400 text-sm mt-2">Live arbitrage scanner — data loaded from cache</p>
                     </div>
-                    <div className="w-full" style={{ height: '90vh' }}>
+                    <div className="w-full border-t border-slate-800/60" style={{ height: '90vh' }}>
                         <iframe
-                            src="https://algoforall-arbedge.onrender.com/arb"
-                            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-                            title="AlgoForAll Sports Book Arb Scanner"
+                            src="https://algoforall-arbedge-1.onrender.com/arb"
+                            className="w-full h-full"
+                            style={{ border: 'none', display: 'block' }}
+                            title="AlgoForAll ArbEdge Scanner"
                         />
                     </div>
-                </section>
+                </motion.section>
 
             </motion.div>
         </div>
